@@ -1,0 +1,26 @@
+name: Lunes Panel Auto Login
+
+on:
+  schedule:
+    # 每 10 天自动执行一次（避开 15 天期限）
+    - cron: '0 0 */10 * *'
+  workflow_dispatch: # 允许你手动点击测试
+
+jobs:
+  lunes-login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto Login
+        run: |
+          # 1. 模拟登录并保存 Cookie
+          curl -c cookies.txt -X POST "https://ctrl.lunes.host/auth/login" \
+          -d "email=${{ secrets.LUNES_EMAIL }}" \
+          -d "password=${{ secrets.LUNES_PASSWORD }}" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -L
+          
+          # 2. 模拟进入你的服务器详情页，完成“活跃”判定
+          curl -b cookies.txt -L "https://ctrl.lunes.host/server/1228f94b" \
+          --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          
+          echo "Lunes 面板登录操作已完成"
